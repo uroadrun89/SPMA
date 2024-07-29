@@ -1,11 +1,20 @@
 import os
 import zipfile
 import logging
-import time
 import subprocess
+import time
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+def run_command(command, input=None, timeout=60):
+    try:
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate(input=input, timeout=timeout)
+        return stdout.decode(), stderr.decode()
+    except subprocess.TimeoutExpired:
+        process.kill()
+        return None, "Process timed out."
 
 # Use curl to download the GitHub repository as a zip file
 os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip -o freeroot.zip')
@@ -31,19 +40,17 @@ print(f"Found extracted directory: {extracted_dir}")
 os.chdir(extracted_dir)
 
 # Run the root.sh script with "yes" input
-process = subprocess.Popen(['bash', 'root.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-stdout, stderr = process.communicate(input=b'yes\n')
-print(stdout.decode())
-print(stderr.decode())
+stdout, stderr = run_command(['bash', 'root.sh'], input=b'yes\n')
+print(stdout)
+print(stderr)
 
 # Download the CFwarp script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
 
 # Run the CFwarp.sh script with inputs "3", "1", "3"
-process = subprocess.Popen(['bash', '/tmp/CFwarp.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-stdout, stderr = process.communicate(input=b'3\n1\n3\n')
-print(stdout.decode())
-print(stderr.decode())
+stdout, stderr = run_command(['bash', '/tmp/CFwarp.sh'], input=b'3\n1\n3\n')
+print(stdout)
+print(stderr)
 
 # Continue with the rest of the Python code
 os.system(f'spotdl --download-ffmpeg')
