@@ -39,6 +39,10 @@ def setup_external_commands():
             stdout, stderr = run_command(f"cd {repo_dir} && git pull")
             if stderr:
                 logger.error(f"Error pulling updates: {stderr}")
+            # Suppress Git pull warnings
+            stdout, stderr = run_command(f"cd {repo_dir} && git config pull.rebase false")
+            if stderr:
+                logger.error(f"Error configuring git pull strategy: {stderr}")
         else:
             logger.error(f"The path '{repo_dir}' exists and is not a directory.")
             return
