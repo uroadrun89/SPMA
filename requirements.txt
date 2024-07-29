@@ -7,4 +7,3 @@ ytmusicapi
 spotipy
 requests
 pip
-expect
