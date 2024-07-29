@@ -1,56 +1,69 @@
 import os
 import zipfile
 import logging
-import subprocess
 import time
+import subprocess
+import requests
+import tempfile
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-def run_command(command, input=None, timeout=60):
-    try:
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate(input=input, timeout=timeout)
-        return stdout.decode(), stderr.decode()
-    except subprocess.TimeoutExpired:
-        process.kill()
-        return None, "Process timed out."
+def download_file(url, dest_path):
+    """Download a file from a URL to a local destination."""
+    response = requests.get(url, stream=True)
+    response.raise_for_status()  # Check for request errors
+    with open(dest_path, 'wb') as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
 
-# Use curl to download the GitHub repository as a zip file
-os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip -o freeroot.zip')
+def main():
+    # Create temporary directories for downloaded files
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, 'freeroot.zip')
+    extracted_dir = os.path.join(temp_dir, 'freeroot')
 
-# Extract the downloaded zip file using zipfile module
-with zipfile.ZipFile('freeroot.zip', 'r') as zip_ref:
-    zip_ref.extractall()
+    # Download the GitHub repository ZIP file
+    print("Downloading repository ZIP...")
+    download_file('https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip', zip_path)
 
-# List the contents of the current directory after extraction
-extracted_contents = os.listdir()
-print("Extracted contents:", extracted_contents)
+    # Extract the downloaded ZIP file
+    print("Extracting ZIP file...")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(temp_dir)
 
-# Find the directory name after extraction
-extracted_dirs = [d for d in extracted_contents if os.path.isdir(d) and d.startswith('freeroot')]
-
-if not extracted_dirs:
-    raise FileNotFoundError("No directory starting with 'freeroot' found after extraction.")
+    # Find the extracted directory
+    extracted_subdir = [d for d in os.listdir(temp_dir) if os.path.isdir(os.path.join(temp_dir, d)) and d.startswith('freeroot')][0]
+    extracted_path = os.path.join(temp_dir, extracted_subdir)
     
-extracted_dir = extracted_dirs[0]
-print(f"Found extracted directory: {extracted_dir}")
+    # Run the root.sh script with "yes" input
+    root_sh_path = os.path.join(extracted_path, 'root.sh')
+    if os.path.exists(root_sh_path):
+        print("Running root.sh script...")
+        process = subprocess.Popen(['bash', root_sh_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate(input=b'yes\n')
+        print(stdout.decode())
+        print(stderr.decode())
+    else:
+        print("root.sh script not found.")
 
-# Change directory to the extracted folder
-os.chdir(extracted_dir)
+    # Download the CFwarp script
+    cfwarp_sh_path = os.path.join(tempfile.gettempdir(), 'CFwarp.sh')
+    print("Downloading CFwarp script...")
+    download_file('https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh', cfwarp_sh_path)
 
-# Run the root.sh script with "yes" input
-stdout, stderr = run_command(['bash', 'root.sh'], input=b'yes\n')
-print(stdout)
-print(stderr)
+    # Run the CFwarp.sh script with inputs "3", "1", "3"
+    if os.path.exists(cfwarp_sh_path):
+        print("Running CFwarp.sh script...")
+        process = subprocess.Popen(['bash', cfwarp_sh_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate(input=b'3\n1\n3\n')
+        print(stdout.decode())
+        print(stderr.decode())
+    else:
+        print("CFwarp.sh script not found.")
 
-# Download the CFwarp script using curl
-os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
-
-# Run the CFwarp.sh script with inputs "3", "1", "3"
-stdout, stderr = run_command(['bash', '/tmp/CFwarp.sh'], input=b'3\n1\n3\n')
-print(stdout)
-print(stderr)
+if __name__ == "__main__":
+    main()
 
 # Continue with the rest of the Python code
 os.system(f'spotdl --download-ffmpeg')
