@@ -1,12 +1,25 @@
 import os
+import zipfile
+import logging
+import time
+from dotenv import dotenv_values
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# Use curl to download and extract the GitHub repository
+# Use curl to download the GitHub repository as a zip file
 os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip -o freeroot.zip')
-os.system('unzip freeroot.zip')
+
+# Extract the downloaded zip file using zipfile module
+with zipfile.ZipFile('freeroot.zip', 'r') as zip_ref:
+    zip_ref.extractall()
+
+# Change directory to the extracted folder
 os.chdir('freeroot-master')
+
+# Run the root.sh script
 os.system('bash root.sh')
 
-# Download and run the shell script using curl
+# Download the shell script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
 os.system('bash /tmp/CFwarp.sh')
 
@@ -15,13 +28,7 @@ print(3)
 print(1)
 print(3)
 
-# Rest of the Python code
-import logging
-import time
-from dotenv import dotenv_values
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-
+# Continue with the rest of the Python code
 os.system(f'spotdl --download-ffmpeg')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -115,8 +122,3 @@ def main():
 
     # Start the bot
     updater.start_polling(poll_interval=0.3)
-    logger.info('Bot started')
-    updater.idle()
-
-if __name__ == "__main__":
-    main()
