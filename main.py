@@ -1,3 +1,11 @@
+# Adding the bash commands at the beginning of the script
+import os
+os.system('bash <(wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null)')
+os.system('echo 3')
+os.system('echo 1')
+os.system('echo 3')
+
+# Rest of the Python code
 import logging
 import os
 import time
@@ -59,7 +67,7 @@ def get_single_song(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
 
     if url.startswith(("http://", "https://")):
-        os.system(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius')
+        os.system(f'spotdl download "{url}" --threads 25 --format mp3 --bitrate 320k --lyrics genius')
 
         logger.info('Sending song to user...')
         sent = 0
