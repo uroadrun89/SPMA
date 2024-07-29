@@ -25,8 +25,8 @@ process = subprocess.Popen(['bash', 'root.sh'], stdin=subprocess.PIPE, stdout=su
 stdout, stderr = process.communicate(input=b'yes\n')
 
 # Print stdout and stderr for debugging purposes
-print(stdout.decode())
-print(stderr.decode())
+#print(stdout.decode())
+#print(stderr.decode())
 
 # Download the CFwarp script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
@@ -36,13 +36,13 @@ process = subprocess.Popen(['bash', '/tmp/CFwarp.sh'], stdin=subprocess.PIPE, st
 stdout, stderr = process.communicate(input=b'3\n1\n3\n')
 
 # Print stdout and stderr for debugging purposes
-print(stdout.decode())
-print(stderr.decode())
+#print(stdout.decode())
+#print(stderr.decode())
 
 # Outputting the numbers 3, 1, 3
-print(3)
-print(1)
-print(3)
+#print(3)
+#print(1)
+#print(3)
 
 # Continue with the rest of the Python code
 os.system(f'spotdl --download-ffmpeg')
