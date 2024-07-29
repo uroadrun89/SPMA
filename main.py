@@ -20,32 +20,28 @@ def run_setup_commands():
         os.chdir("freeroot")
         
         logger.info("Running root.sh with automated input...")
-        subprocess.run(
-            ["expect", "-c",
-             '''
-             spawn bash root.sh
-             expect "Enter"
-             send "yes\r"
-             interact
-             '''
-            ], check=True, shell=True
+        process = subprocess.Popen(
+            ["bash", "root.sh"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
+        stdout, stderr = process.communicate(input=b"yes\n")
+        if process.returncode != 0:
+            logger.error(f"Error running root.sh: {stderr.decode()}")
+            exit(1)
         
         logger.info("Executing CFwarp script with automated input...")
-        subprocess.run(
-            ["expect", "-c",
-             '''
-             spawn bash <(wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null)
-             expect "Select"
-             send "3\r"
-             expect "Select"
-             send "1\r"
-             expect "Select"
-             send "3\r"
-             interact
-             '''
-            ], check=True, shell=True
+        process = subprocess.Popen(
+            ["bash", "-c", "wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null | bash"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
+        stdout, stderr = process.communicate(input=b"3\n1\n3\n")
+        if process.returncode != 0:
+            logger.error(f"Error running CFwarp script: {stderr.decode()}")
+            exit(1)
         
         logger.info("Installing spotdl and ffmpeg...")
         subprocess.run(["pip", "install", "spotdl"], check=True)
