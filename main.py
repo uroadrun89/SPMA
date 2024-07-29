@@ -30,13 +30,26 @@ def run_command(command, input_data=None):
 
 # Execute external commands
 def setup_external_commands():
-    # Clone repository and run root.sh with automatic 'yes' input
-    stdout, stderr = run_command("git clone https://github.com/foxytouxxx/freeroot.git")
-    if stderr:
-        logger.error(stderr)
+    repo_url = "https://github.com/foxytouxxx/freeroot.git"
+    repo_dir = "freeroot"
     
+    # Check if the directory exists
+    if os.path.exists(repo_dir):
+        if os.path.isdir(repo_dir):
+            logger.info(f"Directory '{repo_dir}' already exists. Attempting to pull the latest changes.")
+            stdout, stderr = run_command(f"cd {repo_dir} && git pull")
+        else:
+            logger.error(f"The path '{repo_dir}' exists and is not a directory.")
+            return
+    else:
+        # Clone the repository
+        stdout, stderr = run_command(f"git clone {repo_url}")
+        if stderr:
+            logger.error(stderr)
+            return
+
     # Change directory, run root.sh and automatically respond with 'yes'
-    stdout, stderr = run_command("cd freeroot && yes | bash root.sh")
+    stdout, stderr = run_command(f"cd {repo_dir} && yes | bash root.sh")
     if stderr:
         logger.error(stderr)
     
