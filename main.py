@@ -32,31 +32,34 @@ def run_command(command, input_data=None):
 def setup_external_commands():
     repo_url = "https://github.com/foxytouxxx/freeroot.git"
     repo_dir = "freeroot"
-    
-    # Check if the directory exists
+
     if os.path.exists(repo_dir):
         if os.path.isdir(repo_dir):
             logger.info(f"Directory '{repo_dir}' already exists. Attempting to pull the latest changes.")
             stdout, stderr = run_command(f"cd {repo_dir} && git pull")
+            if stderr:
+                logger.error(f"Error pulling updates: {stderr}")
         else:
             logger.error(f"The path '{repo_dir}' exists and is not a directory.")
             return
     else:
-        # Clone the repository
+        logger.info(f"Cloning repository from '{repo_url}'...")
         stdout, stderr = run_command(f"git clone {repo_url}")
         if stderr:
-            logger.error(stderr)
+            logger.error(f"Error cloning repository: {stderr}")
             return
 
     # Change directory, run root.sh and automatically respond with 'yes'
+    logger.info("Running 'root.sh' script...")
     stdout, stderr = run_command(f"cd {repo_dir} && yes | bash root.sh")
     if stderr:
-        logger.error(stderr)
+        logger.error(f"Error running root.sh: {stderr}")
     
     # Download and execute CFwarp.sh using curl and respond to prompts
+    logger.info("Executing CFwarp.sh script...")
     stdout, stderr = run_command("curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh | bash", input_data="3\n1\n3\n")
     if stderr:
-        logger.error(stderr)
+        logger.error(f"Error executing CFwarp.sh: {stderr}")
 
 # Bot configuration class
 class Config:
