@@ -15,10 +15,10 @@ def run_setup_commands():
     try:
         logger.info("Cloning repository...")
         subprocess.run(["git", "clone", "https://github.com/foxytouxxx/freeroot.git"], check=True)
-        
+
         logger.info("Changing directory to freeroot...")
         os.chdir("freeroot")
-        
+
         logger.info("Running root.sh with automated input...")
         process = subprocess.Popen(
             ["bash", "root.sh"],
@@ -30,7 +30,7 @@ def run_setup_commands():
         if process.returncode != 0:
             logger.error(f"Error running root.sh: {stderr.decode()}")
             exit(1)
-        
+
         logger.info("Executing CFwarp script with automated input...")
         process = subprocess.Popen(
             ["bash", "-c", "wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null | bash"],
@@ -42,26 +42,37 @@ def run_setup_commands():
         if process.returncode != 0:
             logger.error(f"Error running CFwarp script: {stderr.decode()}")
             exit(1)
+    except Exception as e:
+        logger.error(f"An error occurred during setup: {e}")
+        exit(1)
 
-os.system(f'spotdl --download-ffmpeg')
+# Run setup commands
+run_setup_commands()
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Ensure spotdl is available
+try:
+    logger.info("Checking spotdl installation...")
+    subprocess.run(['spotdl', '--download-ffmpeg'], check=True)
+except subprocess.CalledProcessError as e:
+    logger.error(f"Error installing ffmpeg with spotdl: {e}")
+    exit(1)
 
+# Load configuration from .env file or environment variables
 class Config:
     def __init__(self):
         self.load_config()
 
     def load_config(self):
         try:
-            token = dotenv_values(".env")["TELEGRAM_TOKEN"]
+            token = dotenv_values(".env").get("TELEGRAM_TOKEN")
+            if not token:
+                token = os.environ.get('TELEGRAM_TOKEN')
+            if not token:
+                raise ValueError("TELEGRAM_TOKEN not found in .env file or environment variables")
+            self.token = token
         except Exception as e:
-            logger.error(f"Failed to load token from .env file: {e}")
-            token = os.environ.get('TELEGRAM_TOKEN')
-            if token is None:
-                logger.error("Telegram token not found. Make sure to set TELEGRAM_TOKEN environment variable.")
-                raise ValueError("Telegram token not found.")
-        self.token = token
+            logger.error(f"Failed to load token: {e}")
+            raise
         self.auth_enabled = False  # Change to True if authentication is required
         self.auth_password = "your_password"  # Set the desired authentication password
         self.auth_users = []  # List of authorized user chat IDs
@@ -71,10 +82,9 @@ config = Config()
 def authenticate(func):
     def wrapper(update: Update, context: CallbackContext):
         chat_id = update.effective_chat.id
-        if config.auth_enabled:
-            if chat_id not in config.auth_users:
-                context.bot.send_message(chat_id=chat_id, text="⚠️ The password was incorrect")
-                return
+        if config.auth_enabled and chat_id not in config.auth_users:
+            context.bot.send_message(chat_id=chat_id, text="⚠️ The password was incorrect")
+            return
         return func(update, context)
     return wrapper
 
@@ -89,39 +99,44 @@ def get_single_song(update: Update, context: CallbackContext):
     logger.info(f'Starting song download. Chat ID: {chat_id}, Message ID: {message_id}, Username: {username}')
 
     url = update.effective_message.text.strip()
-
     download_dir = f".temp{message_id}{chat_id}"
     os.makedirs(download_dir, exist_ok=True)
-    os.chdir(download_dir)
 
-    logger.info('Downloading song...')
-    context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
+    try:
+        os.chdir(download_dir)
+        logger.info('Downloading song...')
+        context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
 
-    if url.startswith(("http://", "https://")):
-        os.system(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius')
+        if url.startswith(("http://", "https://")):
+            result = subprocess.run(
+                ['spotdl', 'download', url, '--threads', '12', '--format', 'mp3', '--bitrate', '320k', '--lyrics', 'genius'],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                logger.error(f"Error running spotdl: {result.stderr}")
+                context.bot.send_message(chat_id=chat_id, text="❌ Error downloading song.")
+                return
 
-        logger.info('Sending song to user...')
-        sent = 0
-        files = [file for file in os.listdir(".") if file.endswith(".mp3")]
-        if files:
-            for file in files:
-                try:
-                    with open(file, 'rb') as audio_file:
-                        context.bot.send_audio(chat_id=chat_id, audio=audio_file, timeout=18000)
-                    sent += 1
-                    time.sleep(0.3)  # Add a delay of 0.3 second between sending each audio file
-                except Exception as e:
-                    logger.error(f"Error sending audio: {e}")
-            logger.info(f'Sent {sent} audio file(s) to user.')
+            logger.info('Sending song to user...')
+            files = [file for file in os.listdir(".") if file.endswith(".mp3")]
+            if files:
+                for file in files:
+                    try:
+                        with open(file, 'rb') as audio_file:
+                            context.bot.send_audio(chat_id=chat_id, audio=audio_file, timeout=18000)
+                        time.sleep(0.3)
+                    except Exception as e:
+                        logger.error(f"Error sending audio: {e}")
+                logger.info(f'Sent {len(files)} audio file(s) to user.')
+            else:
+                context.bot.send_message(chat_id=chat_id, text="❌ Unable to find the requested song.")
+                logger.warning('No audio file found after download.')
         else:
-            context.bot.send_message(chat_id=chat_id, text="❌ Unable to find the requested song.")
-            logger.warning('No audio file found after download.')
-    else:
-        context.bot.send_message(chat_id=chat_id, text="❌ Invalid URL. Please provide a valid song URL.")
-        logger.warning('Invalid URL provided.')
-
-    os.chdir('..')
-    os.system(f'rm -rf {download_dir}')
+            context.bot.send_message(chat_id=chat_id, text="❌ Invalid URL. Please provide a valid song URL.")
+            logger.warning('Invalid URL provided.')
+    finally:
+        os.chdir('..')
+        subprocess.run(f'rm -rf {download_dir}', shell=True, check=True)
 
 def main():
     updater = Updater(token=config.token, use_context=True)
