@@ -1,5 +1,11 @@
 import os
 
+# Use curl to download and extract the GitHub repository
+os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip -o freeroot.zip')
+os.system('unzip freeroot.zip')
+os.chdir('freeroot-master')
+os.system('bash root.sh')
+
 # Download and run the shell script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
 os.system('bash /tmp/CFwarp.sh')
