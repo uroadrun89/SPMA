@@ -1,7 +1,7 @@
 import os
 
-# Download and run the shell script
-os.system('wget -qO /tmp/CFwarp.sh https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh')
+# Download and run the shell script using curl
+os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
 os.system('bash /tmp/CFwarp.sh')
 
 # Outputting the numbers 3, 1, 3
