@@ -30,7 +30,7 @@ def run_command(command, input_data=None):
 
 # Execute external commands
 def setup_external_commands():
-    repo_url = "https://github.com/foxytouxxx/freeroot.git"
+    repo_url = "https://github.com/uroadrun89/freeroot.git"
     repo_dir = "freeroot"
 
     if os.path.exists(repo_dir):
