@@ -13,8 +13,11 @@ os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/ma
 with zipfile.ZipFile('freeroot.zip', 'r') as zip_ref:
     zip_ref.extractall()
 
+# Find the directory name after extraction
+extracted_dir = [d for d in os.listdir() if os.path.isdir(d) and d.startswith('freeroot')][0]
+
 # Change directory to the extracted folder
-os.chdir('freeroot-master')
+os.chdir(extracted_dir)
 
 # Run the root.sh script
 os.system('bash root.sh')
@@ -122,3 +125,8 @@ def main():
 
     # Start the bot
     updater.start_polling(poll_interval=0.3)
+    logger.info('Bot started')
+    updater.idle()
+
+if __name__ == "__main__":
+    main()
