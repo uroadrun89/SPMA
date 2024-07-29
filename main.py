@@ -1,6 +1,6 @@
+import subprocess
 import logging
 import os
-import subprocess
 import time
 from dotenv import dotenv_values
 from telegram import Update
@@ -10,62 +10,54 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Function to run shell commands
-def run_command(command, input_data=None):
+# Function to run setup commands with automated input handling
+def run_setup_commands():
     try:
-        result = subprocess.run(
-            command, 
-            shell=True, 
-            check=True, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            input=input_data,
-            text=True
+        logger.info("Cloning repository...")
+        subprocess.run(["git", "clone", "https://github.com/foxytouxxx/freeroot.git"], check=True)
+        
+        logger.info("Changing directory to freeroot...")
+        os.chdir("freeroot")
+        
+        logger.info("Running root.sh with automated input...")
+        subprocess.run(
+            ["expect", "-c",
+             '''
+             spawn bash root.sh
+             expect "Enter"
+             send "yes\r"
+             interact
+             '''
+            ], check=True, shell=True
         )
-        logger.info(f"Command '{command}' output: {result.stdout}")
-        return result.stdout, result.stderr
+        
+        logger.info("Executing CFwarp script with automated input...")
+        subprocess.run(
+            ["expect", "-c",
+             '''
+             spawn bash <(wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null)
+             expect "Select"
+             send "3\r"
+             expect "Select"
+             send "1\r"
+             expect "Select"
+             send "3\r"
+             interact
+             '''
+            ], check=True, shell=True
+        )
+        
+        logger.info("Installing spotdl and ffmpeg...")
+        subprocess.run(["pip", "install", "spotdl"], check=True)
+        subprocess.run(["spotdl", "--download-ffmpeg"], check=True)
+        
+        logger.info("Setup completed successfully.")
+        
     except subprocess.CalledProcessError as e:
-        logger.error(f"Command '{command}' failed with error: {e.stderr}")
-        return "", e.stderr
+        logger.error(f"An error occurred during setup: {e}")
+        exit(1)
 
-# Execute external commands
-def setup_external_commands():
-    repo_url = "https://github.com/uroadrun89/freeroot.git"
-    repo_dir = "freeroot"
-
-    if os.path.exists(repo_dir):
-        if os.path.isdir(repo_dir):
-            logger.info(f"Directory '{repo_dir}' already exists. Attempting to pull the latest changes.")
-            stdout, stderr = run_command(f"cd {repo_dir} && git pull")
-            if stderr:
-                logger.error(f"Error pulling updates: {stderr}")
-            # Suppress Git pull warnings
-            stdout, stderr = run_command(f"cd {repo_dir} && git config pull.rebase false")
-            if stderr:
-                logger.error(f"Error configuring git pull strategy: {stderr}")
-        else:
-            logger.error(f"The path '{repo_dir}' exists and is not a directory.")
-            return
-    else:
-        logger.info(f"Cloning repository from '{repo_url}'...")
-        stdout, stderr = run_command(f"git clone {repo_url}")
-        if stderr:
-            logger.error(f"Error cloning repository: {stderr}")
-            return
-
-    # Change directory, run root.sh and automatically respond with 'yes'
-    logger.info("Running 'root.sh' script...")
-    stdout, stderr = run_command(f"cd {repo_dir} && yes | bash root.sh")
-    if stderr:
-        logger.error(f"Error running root.sh: {stderr}")
-    
-    # Download and execute CFwarp.sh using curl and respond to prompts
-    logger.info("Executing CFwarp.sh script...")
-    stdout, stderr = run_command("curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh | bash", input_data="3\n1\n3\n")
-    if stderr:
-        logger.error(f"Error executing CFwarp.sh: {stderr}")
-
-# Bot configuration class
+# Configuration class
 class Config:
     def __init__(self):
         self.load_config()
@@ -86,6 +78,7 @@ class Config:
 
 config = Config()
 
+# Authentication decorator
 def authenticate(func):
     def wrapper(update: Update, context: CallbackContext):
         chat_id = update.effective_chat.id
@@ -96,10 +89,12 @@ def authenticate(func):
         return func(update, context)
     return wrapper
 
+# Command handler for /start
 def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     context.bot.send_message(chat_id=chat_id, text="🎵 Welcome to the Song Downloader Bot! 🎵")
 
+# Message handler for song downloads
 def get_single_song(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     message_id = update.effective_message.message_id
@@ -116,7 +111,7 @@ def get_single_song(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
 
     if url.startswith(("http://", "https://")):
-        os.system(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius')
+        subprocess.run(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius', shell=True, check=True)
 
         logger.info('Sending song to user...')
         sent = 0
@@ -127,7 +122,7 @@ def get_single_song(update: Update, context: CallbackContext):
                     with open(file, 'rb') as audio_file:
                         context.bot.send_audio(chat_id=chat_id, audio=audio_file, timeout=18000)
                     sent += 1
-                    time.sleep(0.3)  # Add a delay of 0.3 second between sending each audio file
+                    time.sleep(0.3)  # Add a delay of 0.3 seconds between sending each audio file
                 except Exception as e:
                     logger.error(f"Error sending audio: {e}")
             logger.info(f'Sent {sent} audio file(s) to user.')
@@ -139,10 +134,12 @@ def get_single_song(update: Update, context: CallbackContext):
         logger.warning('Invalid URL provided.')
 
     os.chdir('..')
-    os.system(f'rm -rf {download_dir}')
+    subprocess.run(f'rm -rf {download_dir}', shell=True, check=True)
 
+# Main function to start the bot
 def main():
-    setup_external_commands()
+    run_setup_commands()
+
     updater = Updater(token=config.token, use_context=True)
     dispatcher = updater.dispatcher
 
