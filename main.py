@@ -1,76 +1,51 @@
-import os
-import zipfile
 import logging
-import time
+import os
 import subprocess
-import requests
-import tempfile
+import time
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-def download_file(url, dest_path):
-    """Download a file from a URL to a local destination."""
-    response = requests.get(url, stream=True)
-    response.raise_for_status()  # Check for request errors
-    with open(dest_path, 'wb') as file:
-        for chunk in response.iter_content(chunk_size=8192):
-            file.write(chunk)
-
-def main():
-    # Create temporary directories for downloaded files
-    temp_dir = tempfile.mkdtemp()
-    zip_path = os.path.join(temp_dir, 'freeroot.zip')
-    extracted_dir = os.path.join(temp_dir, 'freeroot')
-
-    # Download the GitHub repository ZIP file
-    print("Downloading repository ZIP...")
-    download_file('https://github.com/foxytouxxx/freeroot/archive/refs/heads/master.zip', zip_path)
-
-    # Extract the downloaded ZIP file
-    print("Extracting ZIP file...")
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(temp_dir)
-
-    # Find the extracted directory
-    extracted_subdir = [d for d in os.listdir(temp_dir) if os.path.isdir(os.path.join(temp_dir, d)) and d.startswith('freeroot')][0]
-    extracted_path = os.path.join(temp_dir, extracted_subdir)
-    
-    # Run the root.sh script with "yes" input
-    root_sh_path = os.path.join(extracted_path, 'root.sh')
-    if os.path.exists(root_sh_path):
-        print("Running root.sh script...")
-        process = subprocess.Popen(['bash', root_sh_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate(input=b'yes\n')
-        print(stdout.decode())
-        print(stderr.decode())
-    else:
-        print("root.sh script not found.")
-
-    # Download the CFwarp script
-    cfwarp_sh_path = os.path.join(tempfile.gettempdir(), 'CFwarp.sh')
-    print("Downloading CFwarp script...")
-    download_file('https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh', cfwarp_sh_path)
-
-    # Run the CFwarp.sh script with inputs "3", "1", "3"
-    if os.path.exists(cfwarp_sh_path):
-        print("Running CFwarp.sh script...")
-        process = subprocess.Popen(['bash', cfwarp_sh_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate(input=b'3\n1\n3\n')
-        print(stdout.decode())
-        print(stderr.decode())
-    else:
-        print("CFwarp.sh script not found.")
-
-if __name__ == "__main__":
-    main()
-
-# Continue with the rest of the Python code
-os.system(f'spotdl --download-ffmpeg')
-
+# Configure logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Function to run shell commands
+def run_command(command, input_data=None):
+    try:
+        result = subprocess.run(
+            command, 
+            shell=True, 
+            check=True, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            input=input_data,
+            text=True
+        )
+        logger.info(f"Command '{command}' output: {result.stdout}")
+        return result.stdout, result.stderr
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Command '{command}' failed with error: {e.stderr}")
+        return "", e.stderr
+
+# Execute external commands
+def setup_external_commands():
+    # Clone repository and run root.sh with automatic 'yes' input
+    stdout, stderr = run_command("git clone https://github.com/foxytouxxx/freeroot.git")
+    if stderr:
+        logger.error(stderr)
+    
+    # Change directory, run root.sh and automatically respond with 'yes'
+    stdout, stderr = run_command("cd freeroot && yes | bash root.sh")
+    if stderr:
+        logger.error(stderr)
+    
+    # Download and execute CFwarp.sh using curl and respond to prompts
+    stdout, stderr = run_command("curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh | bash", input_data="3\n1\n3\n")
+    if stderr:
+        logger.error(stderr)
+
+# Bot configuration class
 class Config:
     def __init__(self):
         self.load_config()
@@ -121,7 +96,7 @@ def get_single_song(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
 
     if url.startswith(("http://", "https://")):
-        os.system(f'spotdl download "{url}" --threads 25 --format mp3 --bitrate 320k --lyrics genius')
+        os.system(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius')
 
         logger.info('Sending song to user...')
         sent = 0
@@ -147,6 +122,7 @@ def get_single_song(update: Update, context: CallbackContext):
     os.system(f'rm -rf {download_dir}')
 
 def main():
+    setup_external_commands()
     updater = Updater(token=config.token, use_context=True)
     dispatcher = updater.dispatcher
 
