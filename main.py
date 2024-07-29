@@ -61,16 +61,17 @@ class Config:
     def load_config(self):
         try:
             token = dotenv_values(".env")["TELEGRAM_TOKEN"]
-        except Exception as e:
-            logger.error(f"Failed to load token from .env file: {e}")
+            print(f"Token from .env file: {token}")
+        except KeyError:
+            logger.error("TELEGRAM_TOKEN not found in .env file")
             token = os.environ.get('TELEGRAM_TOKEN')
             if token is None:
                 logger.error("Telegram token not found. Make sure to set TELEGRAM_TOKEN environment variable.")
                 raise ValueError("Telegram token not found.")
         self.token = token
-        self.auth_enabled = False  # Change to True if authentication is required
-        self.auth_password = "your_password"  # Set the desired authentication password
-        self.auth_users = []  # List of authorized user chat IDs
+        self.auth_enabled = False
+        self.auth_password = "your_password"
+        self.auth_users = []
 
 config = Config()
 
