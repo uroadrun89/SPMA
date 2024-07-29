@@ -2,6 +2,7 @@ import os
 import zipfile
 import logging
 import time
+import subprocess
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -19,13 +20,24 @@ extracted_dir = [d for d in os.listdir() if os.path.isdir(d) and d.startswith('f
 # Change directory to the extracted folder
 os.chdir(extracted_dir)
 
-# Run the root.sh script
-os.system('bash root.sh')
-print(yes)
+# Run the root.sh script with "yes" input
+process = subprocess.Popen(['bash', 'root.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+stdout, stderr = process.communicate(input=b'yes\n')
 
-# Download the shell script using curl
+# Print stdout and stderr for debugging purposes
+print(stdout.decode())
+print(stderr.decode())
+
+# Download the CFwarp script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
-os.system('bash /tmp/CFwarp.sh')
+
+# Run the CFwarp.sh script with inputs "3", "1", "3"
+process = subprocess.Popen(['bash', '/tmp/CFwarp.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+stdout, stderr = process.communicate(input=b'3\n1\n3\n')
+
+# Print stdout and stderr for debugging purposes
+print(stdout.decode())
+print(stderr.decode())
 
 # Outputting the numbers 3, 1, 3
 print(3)
