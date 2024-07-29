@@ -2,7 +2,7 @@ import os
 import zipfile
 import logging
 import time
-import pexpect
+import subprocess
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -14,34 +14,36 @@ os.system('curl -sL https://github.com/foxytouxxx/freeroot/archive/refs/heads/ma
 with zipfile.ZipFile('freeroot.zip', 'r') as zip_ref:
     zip_ref.extractall()
 
+# List the contents of the current directory after extraction
+extracted_contents = os.listdir()
+print("Extracted contents:", extracted_contents)
+
 # Find the directory name after extraction
-extracted_dir = [d for d in os.listdir() if os.path.isdir(d) and d.startswith('freeroot')][0]
+extracted_dirs = [d for d in extracted_contents if os.path.isdir(d) and d.startswith('freeroot')]
+
+if not extracted_dirs:
+    raise FileNotFoundError("No directory starting with 'freeroot' found after extraction.")
+    
+extracted_dir = extracted_dirs[0]
+print(f"Found extracted directory: {extracted_dir}")
 
 # Change directory to the extracted folder
 os.chdir(extracted_dir)
 
 # Run the root.sh script with "yes" input
-process = pexpect.spawn('bash root.sh')
-process.expect('.*', timeout=10)  # Adjust timeout as needed
-process.sendline('yes')
-process.expect(pexpect.EOF)
-output = process.before.decode()
-print(output)
+process = subprocess.Popen(['bash', 'root.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+stdout, stderr = process.communicate(input=b'yes\n')
+print(stdout.decode())
+print(stderr.decode())
 
 # Download the CFwarp script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
 
 # Run the CFwarp.sh script with inputs "3", "1", "3"
-process = pexpect.spawn('bash /tmp/CFwarp.sh')
-process.expect('.*', timeout=10)  # Adjust timeout as needed
-process.sendline('3')
-process.expect('.*', timeout=10)  # Adjust timeout as needed
-process.sendline('1')
-process.expect('.*', timeout=10)  # Adjust timeout as needed
-process.sendline('3')
-process.expect(pexpect.EOF)
-output = process.before.decode()
-print(output)
+process = subprocess.Popen(['bash', '/tmp/CFwarp.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+stdout, stderr = process.communicate(input=b'3\n1\n3\n')
+print(stdout.decode())
+print(stderr.decode())
 
 # Continue with the rest of the Python code
 os.system(f'spotdl --download-ffmpeg')
