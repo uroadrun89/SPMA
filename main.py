@@ -1,18 +1,22 @@
-# Adding the bash commands at the beginning of the script
 import os
-os.system('bash <(wget -qO- https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh 2> /dev/null)')
-os.system('echo 3')
-os.system('echo 1')
-os.system('echo 3')
+
+# Download and run the shell script
+os.system('wget -qO /tmp/CFwarp.sh https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh')
+os.system('bash /tmp/CFwarp.sh')
+
+# Outputting the numbers 3, 1, 3
+print(3)
+print(1)
+print(3)
 
 # Rest of the Python code
 import logging
-import os
 import time
-os.system(f'spotdl --download-ffmpeg')
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+os.system(f'spotdl --download-ffmpeg')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
