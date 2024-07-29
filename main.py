@@ -1,71 +1,13 @@
-import subprocess
-import os
 import logging
+import os
 import time
+os.system(f'spotdl --download-ffmpeg')
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# Configure logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Define constants for the repository and script
-REPO_URL = "https://github.com/foxytouxxx/freeroot.git"
-REPO_DIR = "freeroot"
-ROOT_SCRIPT = "root.sh"
-SCRIPT_URL = "https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh"
-SCRIPT_PATH = "/tmp/CFwarp.sh"
-INPUT_PATH = "/tmp/input.txt"
-INPUT_COMMANDS = "3\n1\n3"
-
-def run_command(command, cwd=None):
-    """Run a command in a subprocess and handle errors."""
-    try:
-        result = subprocess.run(command, shell=True, cwd=cwd, check=True, text=True, capture_output=True)
-        logger.info(f"Command succeeded: {result.stdout}")
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error occurred: {e.stderr}")
-        exit(1)
-
-def download_and_run_script():
-    """Download and execute a script with input commands."""
-    try:
-        logger.info("Downloading script...")
-        subprocess.run(["curl", "-s", SCRIPT_URL, "-o", SCRIPT_PATH], check=True)
-        logger.info("Script downloaded successfully.")
-
-        # Write the input commands to a file
-        logger.info("Writing input commands...")
-        with open(INPUT_PATH, "w") as input_file:
-            input_file.write(INPUT_COMMANDS)
-        logger.info("Input commands written successfully.")
-
-        # Run the script with the input
-        logger.info("Executing script...")
-        subprocess.run(["bash", SCRIPT_PATH], input=open(INPUT_PATH).read().encode(), check=True)
-        logger.info("Script executed successfully.")
-
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error occurred: {e}")
-
-def clone_repo_and_run_script():
-    """Clone the repository and run a script."""
-    # Clone the repository
-    logger.info("Cloning repository...")
-    run_command(f"git clone {REPO_URL}")
-
-    # Change directory to the cloned repository
-    logger.info(f"Changing directory to {REPO_DIR}...")
-    if os.path.isdir(REPO_DIR):
-        os.chdir(REPO_DIR)
-    else:
-        logger.error(f"Directory {REPO_DIR} does not exist.")
-        exit(1)
-
-    # Run the root.sh script
-    logger.info("Running root.sh...")
-    run_command(f"bash {ROOT_SCRIPT}")
 
 class Config:
     def __init__(self):
@@ -104,7 +46,8 @@ def start(update: Update, context: CallbackContext):
 def get_single_song(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     message_id = update.effective_message.message_id
-    logger.info(f'Starting song download. Chat ID: {chat_id}, Message ID: {message_id}')
+    username = update.effective_chat.username
+    logger.info(f'Starting song download. Chat ID: {chat_id}, Message ID: {message_id}, Username: {username}')
 
     url = update.effective_message.text.strip()
 
@@ -142,11 +85,6 @@ def get_single_song(update: Update, context: CallbackContext):
     os.system(f'rm -rf {download_dir}')
 
 def main():
-    # Execute the setup script and repository commands
-    download_and_run_script()
-    clone_repo_and_run_script()
-
-    # Start the Telegram bot
     updater = Updater(token=config.token, use_context=True)
     dispatcher = updater.dispatcher
 
