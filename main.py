@@ -21,6 +21,7 @@ os.chdir(extracted_dir)
 
 # Run the root.sh script
 os.system('bash root.sh')
+print(yes)
 
 # Download the shell script using curl
 os.system('curl -sL https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh')
