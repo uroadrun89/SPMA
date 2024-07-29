@@ -10,14 +10,20 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Function to run setup commands with automated input handling
 def run_setup_commands():
     try:
-        logger.info("Cloning repository...")
-        subprocess.run(["git", "clone", "https://github.com/foxytouxxx/freeroot.git"], check=True)
+        if not os.path.exists("freeroot"):
+            logger.info("Cloning repository...")
+            subprocess.run(["git", "clone", "https://github.com/foxytouxxx/freeroot.git"], check=True)
+        else:
+            logger.info("Repository already cloned.")
 
         logger.info("Changing directory to freeroot...")
         os.chdir("freeroot")
+
+        if not os.path.isfile("root.sh"):
+            logger.info("root.sh not found. Exiting setup.")
+            exit(1)
 
         logger.info("Running root.sh with automated input...")
         process = subprocess.Popen(
@@ -42,6 +48,7 @@ def run_setup_commands():
         if process.returncode != 0:
             logger.error(f"Error running CFwarp script: {stderr.decode()}")
             exit(1)
+
     except Exception as e:
         logger.error(f"An error occurred during setup: {e}")
         exit(1)
@@ -57,7 +64,6 @@ except subprocess.CalledProcessError as e:
     logger.error(f"Error installing ffmpeg with spotdl: {e}")
     exit(1)
 
-# Load configuration from .env file or environment variables
 class Config:
     def __init__(self):
         self.load_config()
