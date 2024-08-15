@@ -16,15 +16,7 @@ blocks:
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
             - pip install -r requirements.txt
-        - name: Run script
-          commands:
             - python main.py
-  - name: Additional Dependencies
-    task:
-      jobs:
-        - name: Install additional requirements
-          commands:
-            - pip install -r additional-requirements.txt
   - name: Run Python Script
     task:
       env_vars:
