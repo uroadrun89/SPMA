@@ -5,34 +5,44 @@ agent:
     type: e1-standard-2
     os_image: ubuntu2004
 blocks:
+  - name: Set Up Environment
+    task:
+      jobs:
+        - name: Install Python3 and Venv
+          commands:
+            - sudo apt update
+            - sudo apt install -y python3-venv
+        - name: Set up Python environment
+          commands:
+            - python -m venv venv
+            - source venv/bin/activate
   - name: Build and Test
     task:
       jobs:
         - name: Checkout code
           commands:
             - checkout
-        - name: Set up Python environment
-          commands:
-            - python -m venv venv
-            - source venv/bin/activate
         - name: Install dependencies
           commands:
+            - source venv/bin/activate
             - pip install -r requirements.txt
         - name: Run script
           commands:
             - python main.py
-  - name: Install Dependencies
+  - name: Additional Dependencies
     task:
       jobs:
-        - name: Install requirements
+        - name: Install additional requirements
           commands:
-            - pip3.10 install -r requirements.txt
+            - source venv/bin/activate
+            - pip install -r additional-requirements.txt
   - name: Run Python Script
     task:
       env_vars:
         - name: TELEGRAM_TOKEN
-          value: '6953211957:AAE2rdKtITo6qVLjd_tF657pKz9-tj9EiNM'
+          value: '${6953211957:AAE2rdKtITo6qVLjd_tF657pKz9-tj9EiNM}'
       jobs:
         - name: Run main script
           commands:
+            - source venv/bin/activate
             - python3.10 main.py
