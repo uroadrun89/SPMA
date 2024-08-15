@@ -5,24 +5,19 @@ agent:
     type: e1-standard-2
     os_image: ubuntu2004
 blocks:
-  - name: Install Dependencies
+  - name: Build Docker Image
     task:
       jobs:
-        - name: Setup and Install
+        - name: Build Docker Image
           commands:
-            - checkout
-            - ls -al
-            - sem-version python 3.10
-            - pip install --upgrade pip
-            - pip install spotdl python-telegram-bot python-dotenv
-  - name: Run the Bot Script
+            - docker build -t song-downloader-bot .
+            - docker images
+  - name: Run Docker Container
     task:
       jobs:
-        - name: Run the Bot Script
+        - name: Run Docker Container
           commands:
-            - echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
-            - ls -al
-            - python main.py
+            - 'docker run -d -p 80:80 song-downloader-bot'
   - name: Cleanup
     task:
       jobs:
