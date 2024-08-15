@@ -45,3 +45,10 @@ blocks:
         - name: 'Job #1'
           commands:
             - python3.10 main.py
+  - name: 'Block #3'
+    dependencies:
+      - 'Block #2'
+    task:
+      jobs:
+        - name: 'Job #1'
+          commands: []
