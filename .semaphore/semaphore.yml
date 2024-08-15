@@ -10,13 +10,20 @@ blocks:
       jobs:
         - name: Build Docker Image
           commands:
+            - 'echo "Current Directory:"'
+            - pwd
+            - 'echo "Directory Contents:"'
+            - ls -al
+            - echo "Building Docker Image..."
             - docker build -t song-downloader-bot .
+            - 'echo "Docker Images:"'
             - docker images
   - name: Run Docker Container
     task:
       jobs:
         - name: Run Docker Container
           commands:
+            - echo "Running Docker Container..."
             - 'docker run -d -p 80:80 song-downloader-bot'
   - name: Cleanup
     task:
