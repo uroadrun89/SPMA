@@ -1,34 +1,58 @@
 version: v1.0
-name: Song Downloader Bot CI
+name: Telegram Bot CI Pipeline
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu2004
-blocks:
-  - name: Build Docker Image
-    task:
-      jobs:
-        - name: Build Docker Image
-          commands:
-            - 'echo "Current Directory:"'
-            - pwd
-            - 'echo "Directory Contents:"'
-            - ls -al
-            - echo "Building Docker Image..."
-            - docker --version
-            - docker build -t song-downloader-bot .
-            - 'echo "Docker Images:"'
-            - docker images
-  - name: Run Docker Container
-    task:
-      jobs:
-        - name: Run Docker Container
-          commands:
-            - echo "Running Docker Container..."
-            - 'docker run -d -p 80:80 song-downloader-bot'
-  - name: Cleanup
-    task:
-      jobs:
-        - name: Cleanup Job
-          commands:
-            - echo "No cleanup needed"
+jobs:
+  build:
+    name: Build Docker Image
+    steps:
+      - name: Checkout code
+        checkout: true
+      - name: Build Docker Image
+        docker:
+          image: 'docker:20.10'
+          steps:
+            - name: Build image
+              run: |
+                docker build -t telegram-bot .
+      - name: Save Docker image
+        docker:
+          image: 'docker:20.10'
+          steps:
+            - name: Save image
+              run: |
+                docker save -o telegram-bot.tar telegram-bot
+                mkdir -p /workspace/artifacts
+                mv telegram-bot.tar /workspace/artifacts/
+  run:
+    name: Run Docker Container
+    steps:
+      - name: Checkout code
+        checkout: true
+      - name: Load Docker image
+        docker:
+          image: 'docker:20.10'
+          steps:
+            - name: Load image
+              run: |
+                docker load -i /workspace/artifacts/telegram-bot.tar
+      - name: Run container
+        docker:
+          image: 'docker:20.10'
+          steps:
+            - name: Run container
+              run: |
+                docker run --rm -d --name telegram-bot-container telegram-bot
+  cleanup:
+    name: Cleanup
+    steps:
+      - name: Stop container
+        docker:
+          image: 'docker:20.10'
+          steps:
+            - name: Stop container
+              run: |
+                docker stop telegram-bot-container || true
+blocks: []
