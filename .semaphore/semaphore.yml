@@ -1,31 +1,23 @@
 version: v1.0
-name: Telegram Bot CI Pipeline
+name: Telegram Song Downloader Bot
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu2004
-blocks:
-  - name: Build Docker Image
-    task:
-      jobs:
-        - name: Build Image
-          commands:
-            - checkout
-            - docker build -t telegram-bot .
-            - docker save -o telegram-bot.tar telegram-bot
-            - mkdir -p /workspace/artifacts
-            - mv telegram-bot.tar /workspace/artifacts/
-  - name: Run Docker Container
-    task:
-      jobs:
-        - name: Load and Run Container
-          commands:
-            - checkout
-            - docker load -i /workspace/artifacts/telegram-bot.tar
-            - docker run --rm -d --name telegram-bot-container telegram-bot
-  - name: Cleanup
-    task:
-      jobs:
-        - name: Stop and Remove Container
-          commands:
-            - docker stop telegram-bot-container || true
+executor:
+  name: 'python:3.9'
+jobs:
+  - name: Install dependencies
+    commands:
+      - pip install --upgrade pip
+      - pip install python-telegram-bot spotdl python-dotenv
+      - spotdl --download-ffmpeg
+  - name: Run the bot
+    commands:
+      - python bot.py
+pipeline:
+  - name: Build and Run
+    steps:
+      - job: Install dependencies
+      - job: Run the bot
+blocks: []
