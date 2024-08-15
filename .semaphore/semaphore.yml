@@ -12,17 +12,13 @@ blocks:
           commands:
             - checkout
             - sem-version python 3.10
-            - python -m venv venv
-            - source venv/bin/activate
             - pip install --upgrade pip
-            - pip install -r requirements.txt
             - pip install spotdl python-telegram-bot python-dotenv
   - name: Run the Bot Script
     task:
       jobs:
         - name: Run the Bot Script
           commands:
-            - source venv/bin/activate
             - echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
             - python bot.py
   - name: Cleanup
@@ -30,4 +26,4 @@ blocks:
       jobs:
         - name: Cleanup Job
           commands:
-            - rm -rf venv
+            - echo "No cleanup needed"
