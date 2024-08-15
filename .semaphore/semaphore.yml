@@ -5,18 +5,25 @@ agent:
     type: e1-standard-2
     os_image: ubuntu2004
 executors:
-  - name: 'python:3.9'
+  - name: python
     docker:
       image: 'python:3.9'
 jobs:
   - name: Install dependencies and run bot
-    commands:
-      - pip install --upgrade pip
-      - pip install python-telegram-bot spotdl python-dotenv
-      - spotdl --download-ffmpeg
-      - python bot.py
-pipeline:
-  - name: Build and Run
+    executor: python
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            pip install --upgrade pip
+            pip install python-telegram-bot spotdl python-dotenv
+            spotdl --download-ffmpeg
+      - run:
+          name: Run bot
+          command: python bot.py
+workflows:
+  version: v1
+  build:
     jobs:
       - Install dependencies and run bot
 blocks: []
