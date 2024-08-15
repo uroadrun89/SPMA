@@ -2,8 +2,8 @@ version: v1.0
 name: Telegram Song Downloader Bot
 agent:
   machine:
-    type: f1-standard-2
-    os_image: ubuntu2204
+    type: e1-medium
+    os_image: ubuntu-20.04
 blocks:
   - name: Build Docker Image
     task:
