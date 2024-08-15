@@ -5,25 +5,31 @@ agent:
     type: e1-standard-2
     os_image: ubuntu2004
 executors:
-  - name: python
+  - name: python-executor
     docker:
       image: 'python:3.9'
 jobs:
-  - name: Install dependencies and run bot
-    executor: python
+  - name: Install dependencies
+    executor: python-executor
     steps:
+      - checkout
       - run:
-          name: Install dependencies
+          name: Install Python dependencies
           command: |
             pip install --upgrade pip
             pip install python-telegram-bot spotdl python-dotenv
             spotdl --download-ffmpeg
+  - name: Run the bot
+    executor: python-executor
+    steps:
+      - checkout
       - run:
-          name: Run bot
+          name: Run Telegram Bot
           command: python bot.py
 workflows:
   version: v1
   build:
     jobs:
-      - Install dependencies and run bot
+      - Install dependencies
+      - Run the bot
 blocks: []
