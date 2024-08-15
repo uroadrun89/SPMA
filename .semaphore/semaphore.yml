@@ -15,6 +15,7 @@ blocks:
             - 'echo "Directory Contents:"'
             - ls -al
             - echo "Building Docker Image..."
+            - docker --version
             - docker build -t song-downloader-bot .
             - 'echo "Docker Images:"'
             - docker images
