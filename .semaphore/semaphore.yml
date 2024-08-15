@@ -4,12 +4,6 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu2004
-pipelines:
-  default:
-    blocks:
-      - Build and Test
-      - Install Dependencies
-      - Run Python Script
 blocks:
   - name: Build and Test
     task:
