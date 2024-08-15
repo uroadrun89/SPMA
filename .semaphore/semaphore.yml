@@ -3,10 +3,7 @@ name: Song Downloader Bot CI
 agent:
   machine:
     type: e1-standard-2
-    os_image: ubuntu2004
-env_vars:
-  - name: TELEGRAM_TOKEN
-    value: '${{ secrets.TELEGRAM_TOKEN }}'
+    os_image: ubuntu20.04
 blocks:
   - name: Install Dependencies
     task:
@@ -20,12 +17,13 @@ blocks:
             - pip install --upgrade pip
             - pip install -r requirements.txt
             - pip install spotdl python-telegram-bot python-dotenv
-  - name: Run Tests
+  - name: Run the Bot Script
     task:
       jobs:
         - name: Run the Bot Script
           commands:
             - source venv/bin/activate
+            - echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
             - python bot.py
   - name: Cleanup
     task:
