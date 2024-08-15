@@ -4,55 +4,28 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu2004
-jobs:
-  build:
-    name: Build Docker Image
-    steps:
-      - name: Checkout code
-        checkout: true
-      - name: Build Docker Image
-        docker:
-          image: 'docker:20.10'
-          steps:
-            - name: Build image
-              run: |
-                docker build -t telegram-bot .
-      - name: Save Docker image
-        docker:
-          image: 'docker:20.10'
-          steps:
-            - name: Save image
-              run: |
-                docker save -o telegram-bot.tar telegram-bot
-                mkdir -p /workspace/artifacts
-                mv telegram-bot.tar /workspace/artifacts/
-  run:
-    name: Run Docker Container
-    steps:
-      - name: Checkout code
-        checkout: true
-      - name: Load Docker image
-        docker:
-          image: 'docker:20.10'
-          steps:
-            - name: Load image
-              run: |
-                docker load -i /workspace/artifacts/telegram-bot.tar
-      - name: Run container
-        docker:
-          image: 'docker:20.10'
-          steps:
-            - name: Run container
-              run: |
-                docker run --rm -d --name telegram-bot-container telegram-bot
-  cleanup:
-    name: Cleanup
-    steps:
-      - name: Stop container
-        docker:
-          image: 'docker:20.10'
-          steps:
-            - name: Stop container
-              run: |
-                docker stop telegram-bot-container || true
-blocks: []
+blocks:
+  - name: Build Docker Image
+    task:
+      jobs:
+        - name: Build Image
+          commands:
+            - checkout
+            - docker build -t telegram-bot .
+            - docker save -o telegram-bot.tar telegram-bot
+            - mkdir -p /workspace/artifacts
+            - mv telegram-bot.tar /workspace/artifacts/
+  - name: Run Docker Container
+    task:
+      jobs:
+        - name: Load and Run Container
+          commands:
+            - checkout
+            - docker load -i /workspace/artifacts/telegram-bot.tar
+            - docker run --rm -d --name telegram-bot-container telegram-bot
+  - name: Cleanup
+    task:
+      jobs:
+        - name: Stop and Remove Container
+          commands:
+            - docker stop telegram-bot-container || true
