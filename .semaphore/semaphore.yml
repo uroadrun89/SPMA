@@ -1,0 +1,35 @@
+version: v1.0
+name: Song Downloader Bot CI
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+env_vars:
+  - name: TELEGRAM_TOKEN
+    value: '${{ secrets.TELEGRAM_TOKEN }}'
+blocks:
+  - name: Install Dependencies
+    task:
+      jobs:
+        - name: Setup and Install
+          commands:
+            - checkout
+            - sem-version python 3.10
+            - python -m venv venv
+            - source venv/bin/activate
+            - pip install --upgrade pip
+            - pip install -r requirements.txt
+            - pip install spotdl python-telegram-bot python-dotenv
+  - name: Run Tests
+    task:
+      jobs:
+        - name: Run the Bot Script
+          commands:
+            - source venv/bin/activate
+            - python bot.py
+  - name: Cleanup
+    task:
+      jobs:
+        - name: Cleanup Job
+          commands:
+            - rm -rf venv
