@@ -11,6 +11,7 @@ blocks:
         - name: Setup and Install
           commands:
             - checkout
+            - ls -al
             - sem-version python 3.10
             - pip install --upgrade pip
             - pip install spotdl python-telegram-bot python-dotenv
@@ -20,6 +21,7 @@ blocks:
         - name: Run the Bot Script
           commands:
             - echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
+            - ls -al
             - python main.py
   - name: Cleanup
     task:
