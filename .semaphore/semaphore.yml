@@ -5,17 +5,6 @@ agent:
     type: e1-standard-2
     os_image: ubuntu2004
 blocks:
-  - name: Set Up Environment
-    task:
-      jobs:
-        - name: Install Python3 and Venv
-          commands:
-            - sudo apt update
-            - sudo apt install -y python3-venv
-        - name: Set up Python environment
-          commands:
-            - python -m venv venv
-            - source venv/bin/activate
   - name: Build and Test
     task:
       jobs:
@@ -24,7 +13,6 @@ blocks:
             - checkout
         - name: Install dependencies
           commands:
-            - source venv/bin/activate
             - pip install -r requirements.txt
         - name: Run script
           commands:
@@ -34,7 +22,6 @@ blocks:
       jobs:
         - name: Install additional requirements
           commands:
-            - source venv/bin/activate
             - pip install -r additional-requirements.txt
   - name: Run Python Script
     task:
@@ -44,5 +31,4 @@ blocks:
       jobs:
         - name: Run main script
           commands:
-            - source venv/bin/activate
             - python3.10 main.py
