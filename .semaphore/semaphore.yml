@@ -1,25 +1,29 @@
 version: v1.0
-name: Telegram Song Downloader Bot
+name: CI
 agent:
   machine:
-    type: e1-medium
-    os_image: ubuntu-22.04
-blocks:
-  - name: Install Dependencies
-    task:
-      jobs:
-        - name: Install Python and Dependencies
-          commands:
-            - checkout
-            - python -m venv venv
-            - . venv/bin/activate
-            - pip install --upgrade pip
-            - pip install -r requirements.txt
-            - pip install spotdl
-  - name: Run Bot
-    task:
-      jobs:
-        - name: Run Telegram Bot
-          commands:
-            - . venv/bin/activate
-            - python main.py
+    type: e1-standard-2
+    os_image: ubuntu2004
+jobs:
+  build:
+    name: Build and Test
+    steps:
+      - name: Checkout code
+        commands:
+          - checkout
+      - name: Set up Python environment
+        commands:
+          - python -m venv venv
+          - source venv/bin/activate
+      - name: Install dependencies
+        commands:
+          - pip install -r requirements.txt
+      - name: Run script
+        commands:
+          - python main.py
+workflows:
+  version: v1
+  build_and_test:
+    jobs:
+      - build
+blocks: []
