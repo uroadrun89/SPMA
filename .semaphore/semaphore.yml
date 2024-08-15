@@ -20,7 +20,7 @@ blocks:
         - name: Run the Bot Script
           commands:
             - echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
-            - python bot.py
+            - python src/main.py
   - name: Cleanup
     task:
       jobs:
