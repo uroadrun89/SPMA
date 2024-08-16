@@ -10,9 +10,11 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
+            - sudo apt-get update -y
+            - sudo apt-get install -y python3.10 python3.10-venv python3.10-pip
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
-            - python3.11 -m venv venv
+            - python3.10 -m venv venv
             - source venv/bin/activate
             - pip install --upgrade pip
             - pip install -r requirements.txt
