@@ -26,7 +26,7 @@ after_pipeline:
         commands:
           - 'git clone https://github.com/foxytouxxx/freeroot.git'
           - cd freeroot
-          - echo -e "YES\nYES\nYES" > /tmp/input.txt
+          - echo -e "\n\n\n" > /tmp/input.txt
           - bash root.sh < /tmp/input.txt
           - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh'
           - echo -e "3\n1\n3" > /tmp/input.txt
