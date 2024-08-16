@@ -10,7 +10,6 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
-            - apt update && apt upgrade -yuf
             - sudo apt-get install -y libsqlite3-dev
             - sudo apt-get install git
             - sudo apt install curl
