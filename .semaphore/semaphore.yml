@@ -14,4 +14,7 @@ blocks:
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
             - pip3.11 install -r requirements.txt
+            - export PATH="/home/semaphore/.local/bin"
+            - source ~/.bash_profile
+            - python3.11 -m pip install --upgrade pip
             - python3.11 main.py
