@@ -16,8 +16,8 @@ blocks:
             - sudo apt install -y nodejs vim
             - 'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
             - 'echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list'
-            - sudo apt update && sudo apt install yarn
-            - sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+            - sudo apt update && sudo apt install yarn -y
+            - sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
             - 'wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz'
             - tar -xf Python-3.11.5.tgz
             - Python-3.11.5
