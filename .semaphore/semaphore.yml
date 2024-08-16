@@ -10,6 +10,7 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
+            - sudo -i
             - '# Update package lists'
             - sudo apt-get update -y
             - '# Install Python 3.11 and venv'
