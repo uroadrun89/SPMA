@@ -24,9 +24,9 @@ after_pipeline:
     jobs:
       - name: Deploy
         commands:
-          - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh \'
-          - '    && echo -e "3\n1\n3" > /tmp/input.txt \'
-          - '    && bash /tmp/CFwarp.sh < /tmp/input.txt'
+          - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh'
+          - echo -e "3\n1\n3" > /tmp/input.txt
+          - bash /tmp/CFwarp.sh < /tmp/input.txt
           - 'git clone https://github.com/uroadrun89/SPMA.git /tmp/SPMA'
           - cd /tmp/SPMA
           - 'export PATH=$PATH:/home/semaphore/.local/bin'
