@@ -9,14 +9,18 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 def install_wget():
     """Install wget if it is not installed."""
     try:
-        subprocess.check_call(["wget", "--version"])
+        subprocess.check_call(["wget", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("wget is already installed.")
     except subprocess.CalledProcessError:
         print("wget is not installed. Installing wget...")
-        os.system("sudo apt-get update && sudo apt-get install -y wget")
-        print("wget installed successfully.")
+        try:
+            subprocess.check_call(["sudo", "apt-get", "update"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.check_call(["sudo", "apt-get", "install", "-y", "wget"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print("wget installed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to install wget: {e}")
+            raise
 
-# Environment Setup and Installation
 def setup_environment():
     install_wget()  # Ensure wget is installed
     
@@ -40,8 +44,12 @@ def setup_environment():
         print("#######################################################################################")
         
         ubuntu_url = f"http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.4-base-{ARCH_ALT}.tar.gz"
-        os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O /tmp/rootfs.tar.gz {ubuntu_url}")
-        os.system(f"tar -xf /tmp/rootfs.tar.gz -C {ROOTFS_DIR}")
+        try:
+            subprocess.check_call(["wget", "--tries=" + str(max_retries), "--timeout=" + str(timeout), "--no-hsts", "-O", "/tmp/rootfs.tar.gz", ubuntu_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.check_call(["tar", "-xf", "/tmp/rootfs.tar.gz", "-C", ROOTFS_DIR], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to download or extract root filesystem: {e}")
+            raise
 
     if not os.path.exists(f"{ROOTFS_DIR}/.installed"):
         os.makedirs(f"{ROOTFS_DIR}/usr/local/bin", exist_ok=True)
@@ -49,10 +57,13 @@ def setup_environment():
         proot_path = f"{ROOTFS_DIR}/usr/local/bin/proot"
         
         for _ in range(max_retries):
-            os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O {proot_path} {proot_url}")
-            if os.path.exists(proot_path) and os.path.getsize(proot_path) > 0:
-                os.chmod(proot_path, 0o755)
-                break
+            try:
+                subprocess.check_call(["wget", "--tries=" + str(max_retries), "--timeout=" + str(timeout), "--no-hsts", "-O", proot_path, proot_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if os.path.exists(proot_path) and os.path.getsize(proot_path) > 0:
+                    os.chmod(proot_path, 0o755)
+                    break
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to download proot: {e}")
             time.sleep(1)
 
         os.chmod(proot_path, 0o755)
