@@ -25,5 +25,5 @@ blocks:
             - 'git clone https://github.com/uroadrun89/SPMA.git /tmp/SPMA'
             - cd /tmp/SPMA
             - 'export PATH=$PATH:/home/semaphore/.local/bin'
-            - pip3.11 install -r requirements.txt
-            - python3.11 main.py -y
+            - pip3.10 install -r requirements.txt
+            - python3.10 main.py -y
