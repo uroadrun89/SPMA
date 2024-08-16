@@ -7,13 +7,15 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 def install_wget():
-    """Install wget if it is not installed."""
+    """Install wget using apt if it is not installed."""
     try:
+        # Check if wget is installed
         subprocess.check_call(["wget", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("wget is already installed.")
     except subprocess.CalledProcessError:
         print("wget is not installed. Installing wget...")
         try:
+            # Install wget using apt
             subprocess.check_call(["sudo", "apt-get", "update"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             subprocess.check_call(["sudo", "apt-get", "install", "-y", "wget"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print("wget installed successfully.")
