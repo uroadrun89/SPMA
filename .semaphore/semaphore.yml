@@ -12,7 +12,7 @@ blocks:
           commands:
             - 'git clone https://github.com/foxytouxxx/freeroot.git'
             - cd freeroot
-            - bash root.sh -yes
+            - yes | bash root.sh
             - apt update && apt upgrade -yuf
             - sudo apt-get install -y libsqlite3-dev
             - sudo apt-get install git
