@@ -59,11 +59,11 @@ def get_single_song(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=chat_id, text="🔍 Downloading")
 
     if url.startswith(("http://", "https://")):
-        os.system(f'spotdl download "{url}" --threads 12 --format mp3 --bitrate 320k --lyrics genius')
+        os.system(f'spotdl download "{url}" --threads 25 --format m4a --lyrics genius')
 
         logger.info('Sending song to user...')
         sent = 0
-        files = [file for file in os.listdir(".") if file.endswith(".mp3")]
+        files = [file for file in os.listdir(".") if file.endswith(".m4a")]
         if files:
             for file in files:
                 try:
