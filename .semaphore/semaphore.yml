@@ -11,7 +11,7 @@ blocks:
         - name: Set Up Python Environment
           commands:
             - sudo apt-get install -y libsqlite3-dev
-            - sudo apt-get install git coreutils-y
+            - sudo apt-get install git -y
             - sudo apt install curl -y
             - sudo apt install -y nodejs vim
             - 'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
