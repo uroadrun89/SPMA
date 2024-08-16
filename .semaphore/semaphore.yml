@@ -11,13 +11,7 @@ blocks:
         - name: Create and Activate Virtual Environment
           commands:
             - sudo apt-get update -y --fix-missing
-            - sudo apt install python3.8-venv -y
-            - python -m venv venv
-            - source venv/bin/activate
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
-            - pip install -r requirements.txt
-        - name: Run Script
-          commands:
-            - source venv/bin/activate
-            - python main.py
+            - pip3.11 install -r requirements.txt
+            - python3.11 main.py
