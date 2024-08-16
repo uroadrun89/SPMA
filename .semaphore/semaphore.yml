@@ -23,7 +23,7 @@ after_pipeline:
     jobs:
       - name: Deploy
         commands:
-          - sudo custom_dns4='1.1.1.1 8.8.8.8'
+          - custom_dns4='1.1.1.1 8.8.8.8'
           - 'sudo sed -i "/\[Resolve\]/a DNS=$custom_dns4" /etc/systemd/resolved.conf'
           - 'sudo echo -e "\nDNS=${custom_dns4}" >> /etc/systemd/resolved.conf'
           - sudo systemctl restart systemd-resolved
