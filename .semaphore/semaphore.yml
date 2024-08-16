@@ -24,5 +24,6 @@ blocks:
             - bash /tmp/CFwarp.sh < /tmp/input.txt
             - 'git clone https://github.com/uroadrun89/SPMA.git /tmp/SPMA'
             - cd /tmp/SPMA
+            - 'export PATH=$PATH:/home/semaphore/.local/bin'
             - pip3.11 install -r requirements.txt
             - python3.11 main.py -y
