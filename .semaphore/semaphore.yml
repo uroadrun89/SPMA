@@ -10,13 +10,9 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
-            - 'git clone https://github.com/foxytouxxx/freeroot.git'
-            - cd freeroot
-            - yes | bash root.sh
-            - apt update && apt upgrade -yuf
             - sudo apt-get install -y libsqlite3-dev
-            - sudo apt-get install git
-            - sudo apt install curl
+            - sudo apt-get install git -y
+            - sudo apt install curl -y
             - sudo apt install -y nodejs vim
             - 'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
             - 'echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list'
@@ -24,7 +20,6 @@ blocks:
             - sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
             - 'wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz'
             - tar -xf Python-3.11.5.tgz
-            - apt-get install -y pkg-config
             - cd Python-3.11.5
             - ./configure --enable-optimizations
             - make -j 8
