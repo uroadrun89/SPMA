@@ -31,5 +31,5 @@ after_pipeline:
           - ls
           - cd /tmp/SPMA
           - 'export PATH=$PATH:/home/semaphore/.local/bin'
-          - pip3.10 install -r requirements.txt
-          - python3.10 main.py
+          - pip3.9 install -r requirements.txt
+          - python3.9 main.py
