@@ -10,21 +10,39 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
-            - sudo -i
-            - '# Update package lists'
-            - sudo apt-get update -y
-            - '# Install Python 3.11 and venv'
-            - sudo apt-get install python3.11 python3.11-venv python3.11-distutils -y
-            - '# Download and install pip'
-            - 'wget https://bootstrap.pypa.io/get-pip.py'
-            - python3.11 get-pip.py
-            - '# Create a virtual environment using Python 3.11'
-            - python3.11 -m venv venv
-            - '# Activate the virtual environment'
-            - source venv/bin/activate
-            - '# Upgrade pip inside the virtual environment'
-            - pip install --upgrade pip
-            - '# Install dependencies from requirements.txt'
-            - pip install -r requirements.txt
-            - '# Run the Python script'
-            - python main.py
+            - 'FROM vm/ubuntu:18.04'
+            - RUN apt update && apt upgrade -yuf
+            - RUN sudo apt-get install -y libsqlite3-dev
+            - RUN sudo apt-get install git
+            - RUN sudo apt install curl
+            - 'RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo bash -'
+            - 'RUN curl -fsSL https://deb.nodesource.com/setup_14.x | sudo bash -'
+            - RUN sudo apt install -y nodejs vim
+            - 'RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
+            - 'RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list'
+            - RUN sudo apt update && sudo apt install yarn
+            - RUN sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+            - 'RUN wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz'
+            - RUN tar -xf Python-3.11.5.tgz
+            - WORKDIR Python-3.11.5
+            - RUN apt-get install -y pkg-config
+            - RUN ./configure --enable-optimizations
+            - RUN make -j 6
+            - RUN sudo make altinstall
+            - RUN python3.11 -m pip install --upgrade pip
+            - RUN custom_dns4='1.1.1.1 8.8.8.8'
+            - 'RUN sed -i "/\[Resolve\]/a DNS=$custom_dns4" /etc/systemd/resolved.conf'
+            - 'RUN echo -e "\nDNS=${custom_dns4}" >> /etc/systemd/resolved.conf'
+            - RUN systemctl restart systemd-resolved
+            - 'RUN curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh \'
+            - '    && echo -e "3\n1\n3" > /tmp/input.txt \'
+            - '    && bash /tmp/CFwarp.sh < /tmp/input.txt'
+            - WORKDIR /root/SP
+            - 'RUN git clone https://github.com/uroadrun89/SPMA.git'
+            - WORKDIR /root/SP/SPMA
+            - RUN pip3.11 install -r requirements.txt
+            - RUN ls
+            - RUN BACKGROUND python3.11 main.py && \
+            - 'y'
+            - RUN BACKGROUND python3.11 -m http.server 80
+            - 'EXPOSE WEBSITE http://localhost:80'
