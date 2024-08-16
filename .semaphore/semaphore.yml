@@ -10,36 +10,32 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
-            - RUN apt update && apt upgrade -yuf
-            - RUN sudo apt-get install -y libsqlite3-dev
-            - RUN sudo apt-get install git
-            - RUN sudo apt install curl
-            - RUN sudo apt install -y nodejs vim
-            - 'RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
-            - 'RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list'
-            - RUN sudo apt update && sudo apt install yarn
-            - RUN sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
-            - 'RUN wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz'
-            - RUN tar -xf Python-3.11.5.tgz
-            - WORKDIR Python-3.11.5
-            - RUN apt-get install -y pkg-config
-            - RUN ./configure --enable-optimizations
-            - RUN make -j 6
-            - RUN sudo make altinstall
-            - RUN python3.11 -m pip install --upgrade pip
-            - RUN custom_dns4='1.1.1.1 8.8.8.8'
-            - 'RUN sed -i "/\[Resolve\]/a DNS=$custom_dns4" /etc/systemd/resolved.conf'
-            - 'RUN echo -e "\nDNS=${custom_dns4}" >> /etc/systemd/resolved.conf'
-            - RUN systemctl restart systemd-resolved
-            - 'RUN curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh \'
+            - apt update && apt upgrade -yuf
+            - sudo apt-get install -y libsqlite3-dev
+            - sudo apt-get install git
+            - sudo apt install curl
+            - sudo apt install -y nodejs vim
+            - 'curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null'
+            - 'echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list'
+            - sudo apt update && sudo apt install yarn
+            - sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+            - 'wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz'
+            - tar -xf Python-3.11.5.tgz
+            - Python-3.11.5
+            - apt-get install -y pkg-config
+            - ./configure --enable-optimizations
+            - make -j 8
+            - sudo make altinstall
+            - python3.11 -m pip install --upgrade pip
+            - custom_dns4='1.1.1.1 8.8.8.8'
+            - 'sed -i "/\[Resolve\]/a DNS=$custom_dns4" /etc/systemd/resolved.conf'
+            - 'echo -e "\nDNS=${custom_dns4}" >> /etc/systemd/resolved.conf'
+            - systemctl restart systemd-resolved
+            - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh \'
             - '    && echo -e "3\n1\n3" > /tmp/input.txt \'
             - '    && bash /tmp/CFwarp.sh < /tmp/input.txt'
-            - WORKDIR /root/SP
-            - 'RUN git clone https://github.com/uroadrun89/SPMA.git'
-            - WORKDIR /root/SP/SPMA
-            - RUN pip3.11 install -r requirements.txt
-            - RUN ls
-            - RUN BACKGROUND python3.11 main.py && \
-            - 'y'
-            - RUN BACKGROUND python3.11 -m http.server 80
-            - 'EXPOSE WEBSITE http://localhost:80'
+            - 'git clone https://github.com/uroadrun89/SPMA.git'
+            - cd SP
+            - cd SPMA
+            - pip3.11 install -r requirements.txt
+            - python3.11 main.py -y
