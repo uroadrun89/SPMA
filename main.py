@@ -1,5 +1,4 @@
 import os
-import subprocess
 import logging
 import time
 from dotenv import dotenv_values
@@ -10,18 +9,16 @@ def install_wget():
     """Install wget using apt if it is not installed."""
     try:
         # Check if wget is installed
-        subprocess.check_call(["wget", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print("wget is already installed.")
-    except subprocess.CalledProcessError:
-        print("wget is not installed. Installing wget...")
-        try:
-            # Install wget using apt
-            subprocess.check_call(["sudo", "apt-get", "update"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subprocess.check_call(["sudo", "apt-get", "install", "-y", "wget"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if os.system("wget --version") != 0:
+            print("wget is not installed. Installing wget...")
+            os.system("sudo apt-get update")
+            os.system("sudo apt-get install -y wget")
             print("wget installed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to install wget: {e}")
-            raise
+        else:
+            print("wget is already installed.")
+    except Exception as e:
+        print(f"Failed to install wget: {e}")
+        raise
 
 def setup_environment():
     install_wget()  # Ensure wget is installed
@@ -29,7 +26,7 @@ def setup_environment():
     ROOTFS_DIR = os.getcwd()
     max_retries = 50
     timeout = 1
-    ARCH = subprocess.check_output("uname -m", shell=True).decode().strip()
+    ARCH = os.popen("uname -m").read().strip()
 
     if ARCH == "x86_64":
         ARCH_ALT = "amd64"
@@ -47,9 +44,9 @@ def setup_environment():
         
         ubuntu_url = f"http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.4-base-{ARCH_ALT}.tar.gz"
         try:
-            subprocess.check_call(["wget", "--tries=" + str(max_retries), "--timeout=" + str(timeout), "--no-hsts", "-O", "/tmp/rootfs.tar.gz", ubuntu_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subprocess.check_call(["tar", "-xf", "/tmp/rootfs.tar.gz", "-C", ROOTFS_DIR], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except subprocess.CalledProcessError as e:
+            os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O /tmp/rootfs.tar.gz {ubuntu_url}")
+            os.system(f"tar -xf /tmp/rootfs.tar.gz -C {ROOTFS_DIR}")
+        except Exception as e:
             print(f"Failed to download or extract root filesystem: {e}")
             raise
 
@@ -60,11 +57,11 @@ def setup_environment():
         
         for _ in range(max_retries):
             try:
-                subprocess.check_call(["wget", "--tries=" + str(max_retries), "--timeout=" + str(timeout), "--no-hsts", "-O", proot_path, proot_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O {proot_path} {proot_url}")
                 if os.path.exists(proot_path) and os.path.getsize(proot_path) > 0:
                     os.chmod(proot_path, 0o755)
                     break
-            except subprocess.CalledProcessError as e:
+            except Exception as e:
                 print(f"Failed to download proot: {e}")
             time.sleep(1)
 
