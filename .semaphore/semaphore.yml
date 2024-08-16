@@ -11,14 +11,13 @@ blocks:
         - name: Set Up Python Environment
           commands:
             - sudo apt-get update -y
-            - sudo apt-get install python3.11 python3.11-distutils -y
             - 'wget https://bootstrap.pypa.io/get-pip.py'
-            - python3.11 get-pip.py
-            - pip3.11 install virtualenv
-            - pip3.11 install --upgrade pip
+            - python3 get-pip.py
+            - pip3 install virtualenv
+            - pip3 install --upgrade pip
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
-            - python3.11 -m venv venv
+            - python3 -m venv venv
             - source venv/bin/activate
-            - python3.11 -m pip install -r requirements.txt
-            - python3.11 main.py -y
+            - python3 -m pip install -r requirements.txt
+            - python3 main.py -y
