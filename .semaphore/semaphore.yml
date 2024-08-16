@@ -10,15 +10,26 @@ blocks:
       jobs:
         - name: Set Up Python Environment
           commands:
+            - '# Update package lists'
             - sudo apt-get update -y
+            - '# Download and install pip'
             - 'wget https://bootstrap.pypa.io/get-pip.py'
             - python3 get-pip.py
+            - '# Install ensurepip to make sure pip is correctly installed'
             - sudo apt-get install python3-ensurepip -y
+            - '# Install virtualenv (optional, as `venv` is a built-in module)'
             - pip3 install virtualenv
+            - '# Upgrade pip to the latest version'
             - pip3 install --upgrade pip
+            - '# Clone the repository'
             - 'git clone https://github.com/uroadrun89/SPMA.git'
+            - '# Navigate to the cloned repository'
             - cd SPMA
+            - '# Create a virtual environment'
             - python3 -m venv venv
+            - '# Activate the virtual environment'
             - source venv/bin/activate
-            - python3 -m pip install -r requirements.txt
-            - python3 main.py -y
+            - '# Install dependencies within the virtual environment'
+            - pip install -r requirements.txt
+            - '# Run the Python script'
+            - python main.py
