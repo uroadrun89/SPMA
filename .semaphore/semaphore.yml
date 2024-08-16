@@ -8,14 +8,12 @@ blocks:
   - name: Set Up Environment
     task:
       jobs:
-        - name: Create and Activate Virtual Environment
+        - name: Set Up Python Environment
           commands:
-            - sudo apt-get update -y --fix-missing
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
-            - pip3.11 install -r requirements.txt
-            - export PATH="/home/semaphore/.local/bin"
-            - 'export PATH="/usr/bin:/bin"'
-            - source ~/.bash_profile
-            - python3.11 -m pip install --upgrade pip
-            - python3.11 main.py
+            - python3.11 -m venv venv
+            - source venv/bin/activate
+            - pip install --upgrade pip
+            - pip install -r requirements.txt
+            - python main.py
