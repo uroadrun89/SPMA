@@ -19,16 +19,13 @@ blocks:
             - sudo apt update && sudo apt install yarn -y
             - sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev -y
             - python3.10 -m pip install --upgrade pip
-            - 'curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh'
-            - echo -e "3\n1\n3" > /tmp/input.txt
-            - bash /tmp/CFwarp.sh < /tmp/input.txt
-            - 'git clone https://github.com/uroadrun89/SPMA.git /tmp/SPMA'
-            - cd /tmp/SPMA
-            - 'export PATH=$PATH:/home/semaphore/.local/bin'
-            - pip3.10 install -r requirements.txt
 after_pipeline:
   task:
     jobs:
       - name: Deploy
         commands:
+          - 'git clone https://github.com/uroadrun89/SPMA.git /tmp/SPMA'
+          - cd /tmp/SPMA
+          - 'export PATH=$PATH:/home/semaphore/.local/bin'
+          - pip3.10 install -r requirements.txt
           - python3.10 main.py
