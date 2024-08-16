@@ -15,5 +15,8 @@ blocks:
           commands:
             - 'git clone https://github.com/uroadrun89/SPMA.git'
             - cd SPMA
-            - python -m pip install -r requirements.txt
-            - python -m main.py
+            - python3.11 -m pip install -r requirements.txt
+            - python3.11 main.py
+      env_vars:
+        - name: TELEGRAM_TOKEN
+          value: '6953211957:AAE2rdKtITo6qVLjd_tF657pKz9-tj9EiNM'
