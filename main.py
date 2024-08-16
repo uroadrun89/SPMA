@@ -6,8 +6,20 @@ from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
+def install_wget():
+    """Install wget if it is not installed."""
+    try:
+        subprocess.check_call(["wget", "--version"])
+        print("wget is already installed.")
+    except subprocess.CalledProcessError:
+        print("wget is not installed. Installing wget...")
+        os.system("sudo apt-get update && sudo apt-get install -y wget")
+        print("wget installed successfully.")
+
 # Environment Setup and Installation
 def setup_environment():
+    install_wget()  # Ensure wget is installed
+    
     ROOTFS_DIR = os.getcwd()
     max_retries = 50
     timeout = 1
