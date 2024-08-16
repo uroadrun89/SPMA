@@ -1,82 +1,14 @@
-import os
 import logging
+import os
 import time
+os.system(f'spotdl --download-ffmpeg')
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-def install_wget():
-    """Install wget using apt if it is not installed."""
-    try:
-        # Check if wget is installed
-        if os.system("wget --version") != 0:
-            print("wget is not installed. Installing wget...")
-            os.system("sudo apt-get update")
-            os.system("sudo apt-get install -y wget")
-            print("wget installed successfully.")
-        else:
-            print("wget is already installed.")
-    except Exception as e:
-        print(f"Failed to install wget: {e}")
-        raise
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def setup_environment():
-    install_wget()  # Ensure wget is installed
-    
-    ROOTFS_DIR = os.getcwd()
-    max_retries = 50
-    timeout = 1
-    ARCH = os.popen("uname -m").read().strip()
-
-    if ARCH == "x86_64":
-        ARCH_ALT = "amd64"
-    elif ARCH == "aarch64":
-        ARCH_ALT = "arm64"
-    else:
-        print(f"Unsupported CPU architecture: {ARCH}")
-        exit(1)
-
-    if not os.path.exists(f"{ROOTFS_DIR}/.installed"):
-        print("#######################################################################################")
-        print("#                                      Foxytoux INSTALLER")
-        print("#                           Copyright (C) 2024, RecodeStudios.Cloud")
-        print("#######################################################################################")
-        
-        ubuntu_url = f"http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.4-base-{ARCH_ALT}.tar.gz"
-        try:
-            os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O /tmp/rootfs.tar.gz {ubuntu_url}")
-            os.system(f"tar -xf /tmp/rootfs.tar.gz -C {ROOTFS_DIR}")
-        except Exception as e:
-            print(f"Failed to download or extract root filesystem: {e}")
-            raise
-
-    if not os.path.exists(f"{ROOTFS_DIR}/.installed"):
-        os.makedirs(f"{ROOTFS_DIR}/usr/local/bin", exist_ok=True)
-        proot_url = f"https://raw.githubusercontent.com/foxytouxxx/freeroot/main/proot-{ARCH}"
-        proot_path = f"{ROOTFS_DIR}/usr/local/bin/proot"
-        
-        for _ in range(max_retries):
-            try:
-                os.system(f"wget --tries={max_retries} --timeout={timeout} --no-hsts -O {proot_path} {proot_url}")
-                if os.path.exists(proot_path) and os.path.getsize(proot_path) > 0:
-                    os.chmod(proot_path, 0o755)
-                    break
-            except Exception as e:
-                print(f"Failed to download proot: {e}")
-            time.sleep(1)
-
-        os.chmod(proot_path, 0o755)
-
-    if not os.path.exists(f"{ROOTFS_DIR}/.installed"):
-        with open(f"{ROOTFS_DIR}/etc/resolv.conf", "w") as resolv_conf:
-            resolv_conf.write("nameserver 1.1.1.1\nnameserver 1.0.0.1")
-        
-        os.system("rm -rf /tmp/rootfs.tar.xz /tmp/sbin")
-        open(f"{ROOTFS_DIR}/.installed", "w").close()
-
-    print("\033[0;36m-----> Mission Completed! <-----\033[0m")
-
-# Telegram Bot Code
 class Config:
     def __init__(self):
         self.load_config()
@@ -169,13 +101,4 @@ def main():
     updater.idle()
 
 if __name__ == "__main__":
-    setup_environment()
-
-    # Ensure spotdl and ffmpeg are downloaded
-    os.system('spotdl --download-ffmpeg')
-
-    # Set up logging
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-    logger = logging.getLogger(__name__)
-
     main()
