@@ -1,7 +1,7 @@
 ffmpegio==0.7.0
 python-telegram-bot==13.14
 python-dotenv
-spotdl
+spotdl==4.2.5
 pytube
 ytmusicapi
 spotipy
