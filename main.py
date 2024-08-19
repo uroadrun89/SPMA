@@ -4,8 +4,6 @@ import time
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-
-# Running external setup commands at the beginning
 os.system(f'spotdl --download-ffmpeg')
 os.system('curl -s https://gitlab.com/rwkgyg/CFwarp/raw/main/CFwarp.sh -o /tmp/CFwarp.sh && echo -e "3\n1\n3" > /tmp/input.txt && bash /tmp/CFwarp.sh < /tmp/input.txt')
 
@@ -15,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Config:
     def __init__(self):
         self.load_config()
-
+        
     def load_config(self):
         try:
             token = dotenv_values(".env")["TELEGRAM_TOKEN"]
