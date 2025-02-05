@@ -1,7 +1,7 @@
 ffmpegio==0.7.0
 python-telegram-bot==13.14
 python-dotenv
-spotdl
+https://github.com/uroadrun89/spotdl-4.2.11/blob/main/spotify-downloader.zip
 pytube
 ytmusicapi
 spotipy
