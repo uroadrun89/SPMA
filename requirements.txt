@@ -8,3 +8,4 @@ spotipy
 requests
 pip
 urllib3==1.26.15
+yt-dlp
